@@ -1,16 +1,24 @@
 package com.payment.gateway.config;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.payment.gateway.bo.LoginProfile;
+import com.payment.gateway.constant.IConstants;
+import com.payment.gateway.exceptions.AuthenticationException;
+import com.payment.gateway.jpa.LoginRepository;
+import com.payment.gateway.security.UtilRSA;
 import com.payment.gateway.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -26,6 +34,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	private Environment environment;
+	
+	@Autowired
+	private LoginRepository loginRepository;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -52,8 +66,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		//Once we get the token validate it.
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-			UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-
+			//UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+			LoginProfile loginProfile = loginRepository.findIdByUsername(username);
+			if(null == loginProfile) {
+				throw new IOException("username or password mismatch.!");
+			}
+			String decryptedPasswordFatchedDB = null;
+			try {
+				decryptedPasswordFatchedDB = UtilRSA.decrypt(loginProfile.getuPassword(),
+						environment.getProperty("rsa.private.key"));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			final UserDetails userDetails = new User(username, decryptedPasswordFatchedDB,
+					new ArrayList<>());
+			
 			// if token is valid configure Spring Security to manually set authentication
 			if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
