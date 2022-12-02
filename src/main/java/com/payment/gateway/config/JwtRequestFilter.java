@@ -9,11 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.payment.gateway.bo.LoginProfile;
-import com.payment.gateway.constant.IConstants;
-import com.payment.gateway.exceptions.AuthenticationException;
 import com.payment.gateway.jpa.LoginRepository;
 import com.payment.gateway.security.UtilRSA;
-import com.payment.gateway.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,9 +25,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
-	@Autowired
-	private JwtUserDetailsService jwtUserDetailsService;
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;

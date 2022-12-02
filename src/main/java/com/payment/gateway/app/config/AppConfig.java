@@ -32,9 +32,6 @@ public class AppConfig {
 		properties.put("spring.datasource.url", "jdbc:mysql://127.0.0.1:3306/test");
 		properties.put("spring.datasource.username", "root");
 		properties.put("spring.datasource.password", "");
-		//properties.put("spring.datasource.url", "jdbc:db2://172.16.1.99:50000/RAKDB");		
-		//properties.put("spring.datasource.url", "jdbc:db2://172.16.1.159:50000/RAKDB2");
-		//properties.put("spring.datasource.password", "Welcome@123");
 
 	}
 	
